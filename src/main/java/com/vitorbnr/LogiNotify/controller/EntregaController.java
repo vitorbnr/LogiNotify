@@ -1,33 +1,25 @@
 package com.vitorbnr.LogiNotify.controller;
 
-import com.vitorbnr.LogiNotify.config.RabbitMQConfig;
-import com.vitorbnr.LogiNotify.domain.Entrega;
-import com.vitorbnr.LogiNotify.domain.StatusEntrega;
-import com.vitorbnr.LogiNotify.repository.EntregaRepository;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import com.vitorbnr.LogiNotify.dto.EntregaDTO;
+import com.vitorbnr.LogiNotify.service.EntregaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/entregas")
 public class EntregaController {
 
     @Autowired
-    private EntregaRepository repository;
-
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private EntregaService entregaProducer;
 
     @PostMapping
-    public ResponseEntity<Entrega> criarPedido(@RequestBody Entrega entrega) {
+    public ResponseEntity<String> criarEntrega(@RequestBody EntregaDTO entregaDTO) {
+        entregaProducer.enviarNotificacao(entregaDTO);
 
-        entrega.setStatus(StatusEntrega.PENDENTE);
-
-        Entrega entregaSalva = repository.save(entrega);
-
-        rabbitTemplate.convertAndSend(RabbitMQConfig.NOME_FILA, entregaSalva);
-
-        return ResponseEntity.ok(entregaSalva);
+        return ResponseEntity.ok("Entrega recebida e enviada para processamento!");
     }
 }
