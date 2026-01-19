@@ -16,8 +16,6 @@ public class EntregaConsumer {
 
     @RabbitListener(queues = "${rabbitmq.queue.name}")
     public void receberNotificacao(@Payload EntregaDTO entregaDTO) {
-        System.out.println("--- Recebendo mensagem da fila ---");
-
         if (entregaDTO.id() != null) {
             entregaRepository.findById(entregaDTO.id()).ifPresentOrElse(
                     entrega -> {
